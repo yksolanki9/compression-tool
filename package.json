@@ -1,0 +1,18 @@
+{
+  "name": "compression-tool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npx tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bin": {
+    "cpress": "./dist/index.js"
+  },
+  "dependencies": {
+    "typescript": "^5.4.5"
+  }
+}
