@@ -14,9 +14,11 @@ const main = () => {
     const huffmanTree = new HuffmanTree();
     const frequencyTable = huffmanTree.buildFrequencyTable(file);
     const generatedHuffmanTree = huffmanTree.buildHuffmanTree();
+    const huffmanCodes = huffmanTree.getHuffmanCodes();
 
     console.log("Frequencey Table", frequencyTable);
     console.log("Huffman tree", generatedHuffmanTree);
+    console.log("Huffman Codes", huffmanCodes);
   }
 };
 

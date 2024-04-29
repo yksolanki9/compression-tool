@@ -64,4 +64,27 @@ export class HuffmanTree {
     this.tree = pQueue.dequeue();
     return this.tree;
   };
+
+  //Recursive function to generate Huffman codes based on node position
+  parseHuffmanTree = (
+    node: HuffmanNode,
+    prefix: string,
+    codesMap: Map<string, string>
+  ) => {
+    if (node.value) codesMap.set(node.value, prefix);
+
+    if (node.leftNode)
+      this.parseHuffmanTree(node.leftNode, prefix + "0", codesMap);
+    if (node.rightNode)
+      this.parseHuffmanTree(node.rightNode, prefix + "1", codesMap);
+  };
+
+  //Generate Huffman codes from the huffman tree
+  getHuffmanCodes = () => {
+    if (!this.tree) throw new Error("Huffman tree not found");
+
+    const codesMap = new Map<string, string>();
+    this.parseHuffmanTree(this.tree, "", codesMap);
+    return codesMap;
+  };
 }
