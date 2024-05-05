@@ -40,14 +40,14 @@ export class HuffmanTree {
 
   //Build huffman tree from the generated table.
   //Ref: https://opendsa-server.cs.vt.edu/ODSA/Books/CS3/html/Huffman.html
-  buildHuffmanTree = () => {
-    if (!this.table) {
+  buildHuffmanTree = (table: Map<string, number>) => {
+    if (!table) {
       throw new Error("Frequency table not found");
     }
 
     //Create a priority queue and insert all elements into the queue
     const pQueue = new PriorityQueue(this.compareFn);
-    this.table.forEach((weight, value) =>
+    table.forEach((weight, value) =>
       pQueue.enqueue(new HuffmanNode(weight, value, null, null))
     );
 
@@ -80,11 +80,34 @@ export class HuffmanTree {
   };
 
   //Generate Huffman codes from the huffman tree
-  getHuffmanCodes = () => {
-    if (!this.tree) throw new Error("Huffman tree not found");
+  getHuffmanCodes = (tree: HuffmanNode) => {
+    if (!tree) throw new Error("Huffman tree not found");
 
     const codesMap = new Map<string, string>();
-    this.parseHuffmanTree(this.tree, "", codesMap);
+    this.parseHuffmanTree(tree, "", codesMap);
     return codesMap;
+  };
+
+  //Compress the given text using the huffman encoding
+  compress = (text: string) => {
+    //Build frequency table from the given text
+    const table = this.buildFrequencyTable(text);
+
+    //Build huffman tree from the frequency table
+    const tree = this.buildHuffmanTree(table);
+
+    //Generate codes from the huffman tree
+    const codes = this.getHuffmanCodes(tree);
+
+    //Generate the compressed data based on the codes
+    const compressedData = text
+      .split("")
+      .map((c) => codes.get(c))
+      .join("");
+
+    //Pack the compressed data and return it
+    const packedCompressedData = packBitString(compressedData);
+
+    return packedCompressedData;
   };
 }

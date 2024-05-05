@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 import * as fs from "node:fs";
-import { HuffmanTree } from "./utils/huffman-tree";
+import { HuffmanTree } from "./huffman-tree";
 
 const readFile = (filePath: string) => fs.readFileSync(filePath).toString();
 
