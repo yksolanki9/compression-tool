@@ -1,5 +1,6 @@
 import { HuffmanNode } from "./huffman-node";
 import { PriorityQueue } from "./priority-queue";
+import { convertMapToString, packBitString } from "./utils";
 
 export class HuffmanTree {
   private table?: Map<string, number>;
@@ -12,7 +13,7 @@ export class HuffmanTree {
   getFrequencyTable = () => this.table;
 
   //Build frequency table by counting all the occurances of char in the given text
-  buildFrequencyTable = (text: string) => {
+  private buildFrequencyTable = (text: string) => {
     const table = new Map<string, number>();
     for (let c of text) table.set(c, (table.get(c) ?? 0) + 1);
     this.table = table;
@@ -22,7 +23,7 @@ export class HuffmanTree {
   //Combine the two Huffman nodes by creating a new node whose
   //value is null and weight is sum of the 2 nodes
   //left node is the one with lower weight and right, the one with higher weight
-  combineHuffmanNodes = (node1: HuffmanNode, node2: HuffmanNode) => {
+  private combineHuffmanNodes = (node1: HuffmanNode, node2: HuffmanNode) => {
     let leftNode = node1;
     let rightNode = node2;
 
@@ -40,7 +41,7 @@ export class HuffmanTree {
 
   //Build huffman tree from the generated table.
   //Ref: https://opendsa-server.cs.vt.edu/ODSA/Books/CS3/html/Huffman.html
-  buildHuffmanTree = (table: Map<string, number>) => {
+  private buildHuffmanTree = (table: Map<string, number>) => {
     if (!table) {
       throw new Error("Frequency table not found");
     }
@@ -66,7 +67,7 @@ export class HuffmanTree {
   };
 
   //Recursive function to generate Huffman codes based on node position
-  parseHuffmanTree = (
+  private parseHuffmanTree = (
     node: HuffmanNode,
     prefix: string,
     codesMap: Map<string, string>
@@ -80,7 +81,7 @@ export class HuffmanTree {
   };
 
   //Generate Huffman codes from the huffman tree
-  getHuffmanCodes = (tree: HuffmanNode) => {
+  private getHuffmanCodes = (tree: HuffmanNode) => {
     if (!tree) throw new Error("Huffman tree not found");
 
     const codesMap = new Map<string, string>();
@@ -89,9 +90,9 @@ export class HuffmanTree {
   };
 
   //Compress the given text using the huffman encoding
-  compress = (text: string) => {
+  private compressDataUtil = (data: string) => {
     //Build frequency table from the given text
-    const table = this.buildFrequencyTable(text);
+    const table = this.buildFrequencyTable(data);
 
     //Build huffman tree from the frequency table
     const tree = this.buildHuffmanTree(table);
@@ -100,7 +101,7 @@ export class HuffmanTree {
     const codes = this.getHuffmanCodes(tree);
 
     //Generate the compressed data based on the codes
-    const compressedData = text
+    const compressedData = data
       .split("")
       .map((c) => codes.get(c))
       .join("");
@@ -109,5 +110,25 @@ export class HuffmanTree {
     const packedCompressedData = packBitString(compressedData);
 
     return packedCompressedData;
+  };
+
+  //Generate compressed data with header section
+  getCompressedData = (data: string) => {
+    const [compressedUint8Array, padding] = this.compressDataUtil(data);
+    const header = convertMapToString(this.table!);
+    const headerUint8Array = new TextEncoder().encode(header);
+
+    return (
+      //Write header section length separate by new line
+      headerUint8Array.length.toString() +
+      "\n" +
+      //Write padding length separated by new line
+      padding.toString() +
+      "\n" +
+      //Write header as Uint8Array
+      headerUint8Array +
+      //Write compressed data as Uint8Array
+      compressedUint8Array
+    );
   };
 }

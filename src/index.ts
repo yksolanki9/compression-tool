@@ -2,23 +2,36 @@
 
 import * as fs from "node:fs";
 import { HuffmanTree } from "./huffman-tree";
+import { readFile } from "./utils";
 
-const readFile = (filePath: string) => fs.readFileSync(filePath).toString();
+const compressFile = (inputFilePath: string, outputFilePath: string) => {
+  const file = readFile(inputFilePath);
+  const huffmanTree = new HuffmanTree();
+  const compressedData = huffmanTree.getCompressedData(file);
+
+  fs.writeFileSync(outputFilePath, compressedData.toString());
+  console.log("Input file size", fs.statSync(inputFilePath).size);
+  console.log("Compressed file size", fs.statSync(outputFilePath).size);
+  process.exit(0);
+};
+
+const decompressFile = (inputFilePath: string, outputFilePath: string) => {};
 
 const main = () => {
-  if (process.argv.length > 2) {
-    const filePath = process.argv[2];
+  if (process.argv.length < 5) {
+    console.error("Invalid number of arguments");
+    process.exit(1);
+  }
 
-    const file = readFile(filePath);
-
-    const huffmanTree = new HuffmanTree();
-    const frequencyTable = huffmanTree.buildFrequencyTable(file);
-    const generatedHuffmanTree = huffmanTree.buildHuffmanTree();
-    const huffmanCodes = huffmanTree.getHuffmanCodes();
-
-    console.log("Frequencey Table", frequencyTable);
-    console.log("Huffman tree", generatedHuffmanTree);
-    console.log("Huffman Codes", huffmanCodes);
+  const [, , action, inputFilePath, outputFilePath] = process.argv;
+  console.log("DATA", action, inputFilePath, outputFilePath);
+  if (action === "--compress") {
+    compressFile(inputFilePath, outputFilePath);
+  } else if (action === "--decompress") {
+    decompressFile(inputFilePath, outputFilePath);
+  } else {
+    console.error("Invalid command");
+    process.exit(1);
   }
 };
 

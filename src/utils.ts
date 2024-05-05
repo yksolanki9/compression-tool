@@ -1,4 +1,21 @@
-const packBitString = (bitString: string): [Uint8Array, number] => {
+import * as fs from "node:fs";
+
+//Read data from file
+export const readFile = (path: string) => {
+  try {
+    return fs.readFileSync(path, "utf-8");
+  } catch (err) {
+    console.error("Error reading file data", err);
+    process.exit(1);
+  }
+};
+
+//Convert map to string
+export const convertMapToString = (map: Map<any, any>) =>
+  JSON.stringify(Array.from(map.entries()));
+
+//Adds padding and converts the binary string to Uint8Array
+export const packBitString = (bitString: string): [Uint8Array, number] => {
   //Pad the data with 0 so that we can convert it to bytes
   let paddedBitString = bitString;
   while (paddedBitString.length % 8 !== 0) {
