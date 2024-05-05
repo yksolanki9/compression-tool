@@ -107,9 +107,7 @@ export class HuffmanTree {
       .join("");
 
     //Pack the compressed data and return it
-    const packedCompressedData = packBitString(compressedData);
-
-    return packedCompressedData;
+    return packBitString(compressedData);
   };
 
   //Generate compressed data with header section

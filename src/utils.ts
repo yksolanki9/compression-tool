@@ -39,6 +39,8 @@ export const packBitString = (bitString: string): [Uint8Array, number] => {
     //Convert the string to binary Int and push it in the bytes array
     //Eg. '10001000' becomes 136
     bytes[i] = parseInt(byte, 2);
+
+    if (i % 1000 === 0) console.log(`Compressed ${i} of ${size} bytes`);
   }
 
   return [bytes, padding];
