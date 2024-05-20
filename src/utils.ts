@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 //Read data from file
 export const readFile = (path: string) => {
   try {
-    return fs.readFileSync(path, "utf-8");
+    return fs.readFileSync(path, "utf-8").toString();
   } catch (err) {
     console.error("Error reading file data", err);
     process.exit(1);
@@ -31,10 +31,10 @@ export const packBitString = (bitString: string): [Uint8Array, number] => {
 
   for (let i = 0; i < size; i++) {
     const startIndex = i * 8;
-    const endIndex = startIndex * 8;
+    const endIndex = startIndex + 8;
 
     //Get data of byte from the bit string
-    const byte = bitString.slice(startIndex, endIndex);
+    const byte = paddedBitString.slice(startIndex, endIndex);
 
     //Convert the string to binary Int and push it in the bytes array
     //Eg. '10001000' becomes 136

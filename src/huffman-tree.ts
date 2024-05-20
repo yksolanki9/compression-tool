@@ -89,6 +89,13 @@ export class HuffmanTree {
     return codesMap;
   };
 
+  private getCodeToCharMapping = (codes: Map<string, string>) => {
+    return Object.entries(codes).reduce<Map<string, string>>(
+      (acc, [key, value]) => acc.set(value, key),
+      new Map<string, string>()
+    );
+  };
+
   //Compress the given text using the huffman encoding
   private compressDataUtil = (data: string) => {
     //Build frequency table from the given text
@@ -114,19 +121,88 @@ export class HuffmanTree {
   getCompressedData = (data: string) => {
     const [compressedUint8Array, padding] = this.compressDataUtil(data);
     const header = convertMapToString(this.table!);
+
+    //Convert the header string to Uint8Array
     const headerUint8Array = new TextEncoder().encode(header);
 
-    return (
-      //Write header section length separate by new line
-      headerUint8Array.length.toString() +
-      "\n" +
-      //Write padding length separated by new line
-      padding.toString() +
-      "\n" +
-      //Write header as Uint8Array
-      headerUint8Array +
-      //Write compressed data as Uint8Array
-      compressedUint8Array
+    //Return the metadata, header and compressed data
+    return {
+      //Metadata is header length and padding length
+      metadata:
+        headerUint8Array.length.toString() + "\n" + padding.toString() + "\n",
+
+      //Return the frequency table as Uint8Array
+      headerUint8Array,
+
+      //Return the compressed data as Uint8Array
+      compressedUint8Array,
+    };
+  };
+
+  private parseCompressedFile = (data: Buffer) => {
+    let index = 0;
+
+    //Match the char code of "\n" to get the header length
+    while (data[index] !== "\n".charCodeAt(0)) {
+      index++;
+    }
+    const headerLength = parseInt(data.subarray(0, index).toString());
+
+    //Skip "\n"
+    index++;
+
+    const padding = parseInt(data.subarray(index, index + 1).toString());
+
+    //Skip padding and "\n"
+    index += 2;
+
+    const headerBuffer = data.subarray(index, index + headerLength);
+
+    //Get the frequency table buffer as string and parse it to get JSON object
+    const frequencyTable: Map<string, number> = JSON.parse(
+      headerBuffer.toString()
     );
+
+    const compressedData = data.subarray(index + headerLength);
+
+    return { frequencyTable, compressedData, padding };
+  };
+
+  private decompressDataUtil = (data: Buffer) => {
+    const { frequencyTable, compressedData, padding } =
+      this.parseCompressedFile(data);
+
+    const tree = this.buildHuffmanTree(frequencyTable);
+    const codes = this.getHuffmanCodes(tree);
+
+    const codesToCharMapping = this.getCodeToCharMapping(codes);
+
+    console.log("codesToCharMapping", codesToCharMapping);
+
+    let binaryCompressedData = "";
+    let uncompressedData = "";
+    let curBinaryString = "";
+    for (let val of compressedData.values()) {
+      //Convert the decimal to binary string
+      binaryCompressedData += val.toString(2);
+
+      for (let b of binaryCompressedData) {
+        curBinaryString += b;
+        if (codesToCharMapping.get(curBinaryString)) {
+          uncompressedData += codesToCharMapping.get(curBinaryString);
+          curBinaryString = "";
+        }
+      }
+    }
+
+    console.log("UNCOMPRESSED", uncompressedData);
+
+    return uncompressedData;
+  };
+
+  decompressData = (data: Buffer) => {
+    const uncompressedData = this.decompressDataUtil(data);
+
+    console.log("UNCOMPRESSED DATA", uncompressedData);
   };
 }

@@ -9,13 +9,23 @@ const compressFile = (inputFilePath: string, outputFilePath: string) => {
   const huffmanTree = new HuffmanTree();
   const compressedData = huffmanTree.getCompressedData(file);
 
-  fs.writeFileSync(outputFilePath, compressedData.toString());
+  //Write the compressed data to the output file
+  fs.writeFileSync(outputFilePath, compressedData.metadata);
+  fs.appendFileSync(outputFilePath, compressedData.headerUint8Array);
+  fs.appendFileSync(outputFilePath, compressedData.compressedUint8Array);
+
   console.log("Input file size", fs.statSync(inputFilePath).size);
   console.log("Compressed file size", fs.statSync(outputFilePath).size);
   process.exit(0);
 };
 
-const decompressFile = (inputFilePath: string, outputFilePath: string) => {};
+const decompressFile = (inputFilePath: string, outputFilePath: string) => {
+  const file = fs.readFileSync(inputFilePath);
+  const huffmanTree = new HuffmanTree();
+  const decompressedData = huffmanTree.decompressData(file);
+
+  //TODO: Write to file here
+};
 
 const main = () => {
   if (process.argv.length < 5) {
@@ -33,6 +43,7 @@ const main = () => {
     console.error("Invalid command");
     process.exit(1);
   }
+  process.exit(0);
 };
 
 main();
