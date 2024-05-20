@@ -14,6 +14,20 @@ export const readFile = (path: string) => {
 export const convertMapToString = (map: Map<any, any>) =>
   JSON.stringify(Array.from(map.entries()));
 
+//Convert 2D array to map
+export const convertArrayToMap = (arr: [string, number][]) =>
+  arr.reduce<Map<string, number>>(
+    (acc, curr) => acc.set(curr[0], curr[1]),
+    new Map<string, number>()
+  );
+
+//Convert char to code map to code to char map
+export const getCodeToCharMapping = (charToCodeMap: Map<string, string>) =>
+  Array.from(charToCodeMap.entries()).reduce((acc, [key, value]) => {
+    acc.set(value, key);
+    return acc;
+  }, new Map<string, string>());
+
 //Adds padding and converts the binary string to Uint8Array
 export const packBitString = (bitString: string): [Uint8Array, number] => {
   //Pad the data with 0 so that we can convert it to bytes

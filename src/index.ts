@@ -23,8 +23,8 @@ const decompressFile = (inputFilePath: string, outputFilePath: string) => {
   const file = fs.readFileSync(inputFilePath);
   const huffmanTree = new HuffmanTree();
   const decompressedData = huffmanTree.decompressData(file);
-
-  //TODO: Write to file here
+  fs.writeFileSync(outputFilePath, decompressedData);
+  process.exit(0);
 };
 
 const main = () => {
@@ -35,6 +35,7 @@ const main = () => {
 
   const [, , action, inputFilePath, outputFilePath] = process.argv;
   console.log("DATA", action, inputFilePath, outputFilePath);
+
   if (action === "--compress") {
     compressFile(inputFilePath, outputFilePath);
   } else if (action === "--decompress") {

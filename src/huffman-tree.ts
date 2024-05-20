@@ -1,6 +1,11 @@
 import { HuffmanNode } from "./huffman-node";
 import { PriorityQueue } from "./priority-queue";
-import { convertMapToString, packBitString } from "./utils";
+import {
+  convertArrayToMap,
+  convertMapToString,
+  getCodeToCharMapping,
+  packBitString,
+} from "./utils";
 
 export class HuffmanTree {
   private table?: Map<string, number>;
@@ -89,13 +94,6 @@ export class HuffmanTree {
     return codesMap;
   };
 
-  private getCodeToCharMapping = (codes: Map<string, string>) => {
-    return Object.entries(codes).reduce<Map<string, string>>(
-      (acc, [key, value]) => acc.set(value, key),
-      new Map<string, string>()
-    );
-  };
-
   //Compress the given text using the huffman encoding
   private compressDataUtil = (data: string) => {
     //Build frequency table from the given text
@@ -159,50 +157,35 @@ export class HuffmanTree {
     const headerBuffer = data.subarray(index, index + headerLength);
 
     //Get the frequency table buffer as string and parse it to get JSON object
-    const frequencyTable: Map<string, number> = JSON.parse(
-      headerBuffer.toString()
-    );
+    const frequencyTable = JSON.parse(headerBuffer.toString());
 
     const compressedData = data.subarray(index + headerLength);
 
     return { frequencyTable, compressedData, padding };
   };
 
-  private decompressDataUtil = (data: Buffer) => {
+  decompressData = (data: Buffer) => {
     const { frequencyTable, compressedData, padding } =
       this.parseCompressedFile(data);
 
-    const tree = this.buildHuffmanTree(frequencyTable);
+    const tree = this.buildHuffmanTree(convertArrayToMap(frequencyTable));
     const codes = this.getHuffmanCodes(tree);
 
-    const codesToCharMapping = this.getCodeToCharMapping(codes);
+    const codeToCharMap = getCodeToCharMapping(codes);
 
-    console.log("codesToCharMapping", codesToCharMapping);
-
-    let binaryCompressedData = "";
     let uncompressedData = "";
     let curBinaryString = "";
     for (let val of compressedData.values()) {
       //Convert the decimal to binary string
-      binaryCompressedData += val.toString(2);
-
-      for (let b of binaryCompressedData) {
+      for (let b of val.toString(2).padStart(8, "0")) {
         curBinaryString += b;
-        if (codesToCharMapping.get(curBinaryString)) {
-          uncompressedData += codesToCharMapping.get(curBinaryString);
+        if (codeToCharMap.get(curBinaryString)) {
+          uncompressedData += codeToCharMap.get(curBinaryString);
           curBinaryString = "";
         }
       }
     }
 
-    console.log("UNCOMPRESSED", uncompressedData);
-
     return uncompressedData;
-  };
-
-  decompressData = (data: Buffer) => {
-    const uncompressedData = this.decompressDataUtil(data);
-
-    console.log("UNCOMPRESSED DATA", uncompressedData);
   };
 }
