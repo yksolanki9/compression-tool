@@ -175,16 +175,26 @@ export class HuffmanTree {
 
     let uncompressedData = "";
     let curBinaryString = "";
-    for (let val of compressedData.values()) {
+
+    compressedData.forEach((val, index) => {
       //Convert the decimal to binary string
-      for (let b of val.toString(2).padStart(8, "0")) {
+      //We need padding because 0s at the start are ignored in the binary string
+      let binaryString = val.toString(2).padStart(8, "0");
+
+      //If we are at the last byte, then we still need to convert it to string and pad the start
+      //but we need to remove the padding at the end
+      if (index === compressedData.length - 1) {
+        binaryString = binaryString.slice(0, 8 - padding);
+      }
+
+      for (let b of binaryString) {
         curBinaryString += b;
         if (codeToCharMap.get(curBinaryString)) {
           uncompressedData += codeToCharMap.get(curBinaryString);
           curBinaryString = "";
         }
       }
-    }
+    });
 
     return uncompressedData;
   };
